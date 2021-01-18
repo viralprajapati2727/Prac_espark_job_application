@@ -1,4 +1,5 @@
 var exp_array = [];
+
 (function ( $ ) {
     $.fn.multiStepForm = function(args) {
         if(args === null || typeof args !== 'object' || $.isArray(args))
@@ -31,10 +32,15 @@ var exp_array = [];
             form.navigateTo(curIndex() - 1);
         });
 
-        form.find('.next').click(function() {
+        form.find('.next').click(function () {
             if('validations' in args && typeof args.validations === 'object' && !$.isArray(args.validations)){
                 if(!('noValidate' in args) || (typeof args.noValidate === 'boolean' && !args.noValidate)){
                     form.validate(args.validations);
+                    validateExtraField();
+                    validateExtraFieldLangs();
+                    validateExtraFieldTech();
+                    validateExtraFieldReference();
+                    
                     if(form.valid() == true){
                         form.navigateTo(curIndex() + 1);
                         return true;
@@ -60,8 +66,8 @@ var exp_array = [];
     };
 }( jQuery ));
 
+$(document).ready(function () {
 
-$(document).ready(function(){
     var d = new Date();
     var Y = d.getFullYear();
     var M = parseInt(d.getMonth());
@@ -78,157 +84,170 @@ $(document).ready(function(){
 
     $(".btn-add-more-exp,.or_add").show();
 
-    $.validator.addMethod('date', function(value, element, param) {
+    $.validator.addMethod('date', function (value, element, param) {
         return (value != 0) && (value <= 31) && (value == parseInt(value, 10));
     }, 'Please enter a valid date!');
-    $.validator.addMethod('month', function(value, element, param) {
+    $.validator.addMethod('month', function (value, element, param) {
         return (value != 0) && (value <= 12) && (value == parseInt(value, 10));
     }, 'Please enter a valid month!');
-    $.validator.addMethod('year', function(value, element, param) {
+    $.validator.addMethod('year', function (value, element, param) {
         return (value != 0) && (value >= 1900) && (value == parseInt(value, 10));
     }, 'Please enter a valid year not less than 1900!');
 
 
-    $.validator.addMethod('username', function(value, element, param) {
+    $.validator.addMethod('username', function (value, element, param) {
         var nameRegex = /^[a-zA-Z0-9]+$/;
         return value.match(nameRegex);
     }, 'Only a-z, A-Z, 0-9 characters are allowed');
 
     var val = {
+        errorPlacement: function (error, element) {
+            if (element.parent('div').hasClass('parent-checkbox')) {
+                error.appendTo(element.parent().parent().parent());
+            } else  if (element.parents('div').hasClass('languges-option')) {
+                error.appendTo(element.parent().parent().parent().parent());
+            } else if (element.parent('div').hasClass('parent-radio')) {
+                error.appendTo(element.parent().parent().parent());
+            } else  if (element.parents('div').hasClass('technology-option')) {
+                error.appendTo(element.parent().parent().parent().parent());
+            } else {
+                error.insertAfter(element);
+            }
+        },
         rules: {
             fname: {
-                required :true,
-                minlength:2,
-                maxlength:50,
+                required: true,
+                minlength: 2,
+                maxlength: 50,
             },
             lname: {
-                required :true,
-                minlength:2,
-                maxlength:50,
+                required: true,
+                minlength: 2,
+                maxlength: 50,
             },
             email: {
                 required: true,
                 email: true
             },
             address1: {
-                required :true,
-                minlength:5,
-                maxlength:100,
+                required: true,
+                minlength: 5,
+                maxlength: 100,
             },
             state: {
-                required :true,
-                minlength:2,
-                maxlength:50,
+                required: true,
+                minlength: 2,
+                maxlength: 50,
             },
             city: {
-                required :true,
-                minlength:2,
-                maxlength:50,
+                required: true,
+                minlength: 2,
+                maxlength: 50,
             },
             postcode: {
-                required :true,
-                digits :true,
-                minlength:4,
-                maxlength:10,
+                required: true,
+                digits: true,
+                minlength: 4,
+                maxlength: 10,
             },
-            phone: {
-                required:true,
-                minlength:10,
-                maxlength:10,
-                digits:true
+            phone_number: {
+                required: true,
+                minlength: 10,
+                maxlength: 10,
+                digits: true
             },
-            "ssc[nob]":{
-                required:   true,
-                minlength:   2,
-                maxlength:   50,
+            "ssc[nob]": {
+                required: true,
+                minlength: 2,
+                maxlength: 50,
             },
-            "ssc[year]":{
-                required:   true,
-                minlength:   2,
-                maxlength:   10,
-                digits:true
+            "ssc[year]": {
+                required: true,
+                minlength: 2,
+                maxlength: 10,
+                digits: true
             },
-            "ssc[percentage]":{
-                required:   true,
-                minlength:   1,
-                maxlength:   10,
-                digits:true
+            "ssc[percentage]": {
+                required: true,
+                minlength: 1,
+                maxlength: 10,
+                digits: true
             },
-            "hsc[nob]":{
-                required:   true,
-                minlength:   2,
-                maxlength:   50,
+            "hsc[nob]": {
+                required: true,
+                minlength: 2,
+                maxlength: 50,
             },
-            "hsc[year]":{
-                required:   true,
-                minlength:   2,
-                maxlength:   10,
-                digits:true
+            "hsc[year]": {
+                required: true,
+                minlength: 2,
+                maxlength: 10,
+                digits: true
             },
-            "hsc[percentage]":{
-                required:   true,
-                minlength:   1,
-                maxlength:   10,
-                digits:true
+            "hsc[percentage]": {
+                required: true,
+                minlength: 1,
+                maxlength: 10,
+                digits: true
             },
-            "be[course]":{
-                required:   true,
-                minlength:   2,
-                maxlength:   50,
+            "be[course]": {
+                required: true,
+                minlength: 2,
+                maxlength: 50,
             },
-            "be[university]":{
-                required:   true,
-                minlength:   2,
-                maxlength:   50,
+            "be[university]": {
+                required: true,
+                minlength: 2,
+                maxlength: 50,
             },
-            "be[year]":{
-                required:   true,
-                minlength:   2,
-                maxlength:   50,
-                digits:true
+            "be[year]": {
+                required: true,
+                minlength: 2,
+                maxlength: 50,
+                digits: true
             },
-            "be[percentage]":{
-                required:   true,
-                minlength:   2,
-                maxlength:   50,
-                digits:true
+            "be[percentage]": {
+                required: true,
+                minlength: 2,
+                maxlength: 50,
+                digits: true
             },
-            "me[course]":{
+            "me[course]": {
                 // required:   true,
-                minlength:   2,
-                maxlength:   50,
+                minlength: 2,
+                maxlength: 50,
             },
-            "me[university]":{
+            "me[university]": {
                 // required:   true,
-                minlength:   2,
-                maxlength:   50,
+                minlength: 2,
+                maxlength: 50,
             },
-            "me[year]":{
+            "me[year]": {
                 // required:   true,
-                minlength:   2,
-                maxlength:   50,
-                digits:true
+                minlength: 2,
+                maxlength: 50,
+                digits: true
             },
-            "me[percentage]":{
+            "me[percentage]": {
                 // required:   true,
-                minlength:   2,
-                maxlength:   50,
-                digits:true
+                minlength: 2,
+                maxlength: 50,
+                digits: true
             },
-            "notice_period":{
-                required:   true,
-                minlength:   2,
-                maxlength:   20,
+            "notice_period": {
+                required: true,
+                minlength: 2,
+                maxlength: 20,
             },
-            "expected_ctc":{
-                required:   true,
-                minlength:   2,
-                maxlength:   20,
+            "expected_ctc": {
+                required: true,
+                minlength: 2,
+                maxlength: 20,
             },
-            "current_ctc":{
-                required:   true,
-                minlength:   2,
-                maxlength:   20,
+            "current_ctc": {
+                required: true,
+                minlength: 2,
+                maxlength: 20,
             },
         },
         messages: {
@@ -267,7 +286,7 @@ $(document).ready(function(){
                 maxlength:  "Please enter 10 digit mobile number",
                 digits:     "Only numbers are allowed in this field"
             },
-            phone:{
+            phone_number:{
                 required:   "Please enter phone number",
                 minlength:  "Please enter 10 digit mobile number",
                 maxlength:  "Please enter 10 digit mobile number",
@@ -366,27 +385,24 @@ $(document).ready(function(){
                 minlength:   "Minimum {0} characters are required",
                 maxlength:   "Maximum {0} characters are allowed",
             },
-        }
+        } 
     }
-    
-    
+
     $("#postJobForm").multiStepForm(
     {
         // defaultStep:0,
         beforeSubmit : function(form, submit){
-            console.log("called before submiting the form");
-            console.log(form);
-            console.log(submit);
+            // console.log("called before submiting the form");
+            // console.log(form);
+            // console.log(submit);
         },
         validations:val,
     }
-    ).navigateTo(0);    
-
-
+    ).navigateTo(0);
 
     $(document).on('click','.btn-add-more-exp',function(){
         validateExtraField();
-    
+        
         var is_valid = true;
         $('#work-eperieance input').each(function() {
             $('#postJobForm').validate().element(this);
@@ -425,7 +441,7 @@ $(document).ready(function(){
     
     $(document).on('click','.btn-add-more-reference',function(){
         validateExtraFieldReference();
-    
+        
         var is_valid = true;
         $('#reference-contact input').each(function() {
             $('#postJobForm').validate().element(this);
@@ -464,7 +480,8 @@ $(document).ready(function(){
     
 });
 
-function validateExtraField(){
+function validateExtraField() {
+    // console.log('validateExtraField called');
     $('.company_name').each(function() {
         $(this).rules('add', {
             required: true,
@@ -511,7 +528,8 @@ function validateExtraField(){
         });
     });
 }
-function validateExtraFieldReference(){
+function validateExtraFieldReference() {
+    // console.log('validateExtraFieldReference called')
     $('.name').each(function() {
         $(this).rules('add', {
             required: true,
@@ -545,5 +563,109 @@ function validateExtraFieldReference(){
                 // maxlength: "Maximum {0} characters are allowed",
             }
         });
+    });
+}
+
+// Language wise selection and option enable/desable
+    
+$(document).on('click', '.lang-name', function () {
+    var _this = $(this);
+
+    if (_this.prop('checked') === true) {
+        $(document).find('.lang-option' + _this.data('id')).prop('disabled',false);
+    } else {
+        $(document).find('.lang-option' + _this.data('id')).prop('disabled',true);
+    }
+});
+
+$(document).on('click', '.prog-lang-name', function () {
+    var _this = $(this);
+
+    if (_this.prop('checked') === true) {
+        $(document).find('.prog-lang-option' + _this.data('id')).prop('disabled',false);
+    } else {
+        $(document).find('.prog-lang-option' + _this.data('id')).prop('disabled',true);
+    }
+});
+
+$(document).on('click', '.lang-name', function () {
+    if ($("input[name*='language']:checked").length > 0) { 
+        $('#HINDI1').rules('remove', "required");
+    } else {
+        validateExtraFieldLangs();
+    }
+    $("#postJobForm").valid();
+})
+$(document).on('click','.prog-lang-name', function(){
+    if ($("input[name*='technology']:checked").length > 0) { 
+        $('#PHP1').rules('remove', "required");
+    } else {
+        validateExtraFieldTech();   
+    }
+    $("#postJobForm").valid();
+})
+$(document).on('click','.sub-checkbox', function(){
+    $("#postJobForm").valid();
+})
+$(document).on('click','.sub-radio', function(){
+    $("#postJobForm").valid();
+})
+
+function validateExtraFieldLangs() {
+    $('.lang-name').each(function (key, val) {
+        var _id = $(this).data('id');
+        var concat_id = $(this).data('key') + $(this).data('id');
+      
+        if ($("input[name*='language']:checked").length == 0) {
+            $('#'+concat_id).rules('add', {
+                required: true,
+                messages :{
+                    required : "Please select at least one language",
+                }
+            });
+            return false
+        }
+
+        if ($('input[name*="language['+$(this).data('id')+']"]').prop('checked') == true ) {
+            $('#read'+_id).rules('add', {
+                required: {
+                    depends: function () {
+                        if ($('input[name*="read[' + _id+']"]').prop('checked') == false &&
+                            $('input[name*="write[' + _id+']"]').prop('checked') == false &&
+                            $('input[name*="speak[' + _id+']"]').prop('checked')  == false) {
+                            return true;
+                        }
+                        return false;
+                    }
+                },
+                messages :{
+                    required : "Please check at lease one checkbox",
+                }
+            });
+        }
+    });
+}
+function validateExtraFieldTech() {
+    $('.prog-lang-name').each(function (key, val) {
+        var _id = $(this).data('id');
+        var concat_id = $(this).data('key') + $(this).data('id');
+        if(key == 0  && $("input[name*='technology']:checked").length == 0){
+            $('#'+concat_id).rules('add', {
+                required: true,
+                messages :{
+                    required : "Please select at least one technology",
+                }
+            });
+            return false
+        }
+
+        if ($('input[name*="technology['+$(this).data('id')+']"]').prop('checked') == true ) {
+            $('input[name*="technology' + _id+'"]').rules('add', {
+                required: true,
+                messages :{
+                    required : "Please select at least one level",
+                }
+            });
+        }
     });
 }

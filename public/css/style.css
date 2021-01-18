@@ -79,3 +79,9 @@ button:hover {
 .error {
     color: #f00;
 }
+.application-detail{
+    padding: 20px;
+}
+.application-detail ul{
+    list-style: none;
+}

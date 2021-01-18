@@ -20,4 +20,5 @@ Route::group(['middleware' => ['verified','auth']], function () {
     Route::get('/home', 'JobController@fillForm')->name('home');
     Route::post('update', 'JobController@update')->name('job.store');
     Route::get('/view-detail', 'JobController@detail')->name('view-detail');
+    Route::get('/destroy', 'JobController@destroy')->name('destroy');
 });

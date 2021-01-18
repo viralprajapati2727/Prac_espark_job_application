@@ -26,8 +26,71 @@ class JobController extends Controller
 
         DB::beginTransaction();
         try{
+            $validator = Validator::make($request->all(), [
+				'fname' => 'required|min:2|max:50',
+                'lname' => 'required|min:2|max:50',
+                'email' => 'required|email',
+				'address1' => 'required|min:5|max:100',
+				'state' => 'required|min:2|max:50',
+				'city' => 'required|min:2|max:50',
+                'postcode' => 'required|numeric|digits_between:4,10',
+				'state' => 'required',
+                'phone_number' => 'required|numeric|digits:10',
+                'ssc.nob' => 'required|min:2|max:50',
+                'ssc.year' => 'required|digits_between:2,10|numeric',
+                'ssc.percentage' => 'required|digits_between:2,10|numeric',
+                'hsc.nob' => 'required|min:2|max:50',
+                'hsc.year' => 'required|digits_between:2,10|numeric',
+                'hsc.percentage' => 'required|digits_between:2,10|numeric',
+                'be.course' => 'required|min:2|max:50',
+                'be.university' => 'required|min:2|max:50',
+                'be.year' => 'required|digits_between:2,10|numeric',
+                'be.percentage' => 'required|digits_between:2,10|numeric',
+                'me.cource' => 'min:2|max:50',
+                // 'me.university' => 'min:2|max:50',
+                // 'me.year' => 'min:2|max:10|numeric',
+                // 'me.percentage' => 'min:2|max:10|numeric',
+                'notice_period' => 'required|min:2|max:10',
+                'expected_ctc' => 'required|min:2|max:20',
+                'current_ctc' => 'required|min:2|max:20',
+                'exp.*.company_name' => 'required|max:100',
+                'exp.*.designation' => 'required|max:100',
+                'exp.*.from' => 'required',
+                'exp.*.to' => 'required',
+                'reference.*.name' => 'required',
+                'reference.*.phone' => 'required',
+                'reference.*.relation' => 'required',
+			],[
+                'ssc.nob.required' => "please add name of board",
+                'ssc.year.required' => "please add year",
+                'ssc.percentage.required' => "please add percentage",
+                'hsc.nob.required' => "please add name of board",
+                'hsc.year.required' => "please add year",
+                'hsc.percentage.required' => "please add percentage",
+                'be.course.required' => 'please add course name',
+                'be.university.required' => 'please add university name',
+                'be.year.required' => 'please add year',
+                'be.percentage.required' => 'please add percentage',
+                'exp.*.company_name.required' => "please add company name",
+                'exp.*.designation.required' => "please add designation",
+                'exp.*.from.required' => "please add from date",
+                'exp.*.to.required' => "please add to date",
+                'reference.*.name.required' => "please add reference name",
+                'reference.*.phone.required' => "please add reference phone number",
+                'reference.*.relation.required' => "please add reference relation",
+            ]);
+
+            if ($validator->fails()) {
+                DB::rollback();
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
+            
             $user = Auth::user();
-            $dob = Carbon::createFromFormat('d/m/Y', $request->dob)->format('Y-m-d');
+            
+            $dob = null;
+            if($request->dob){
+                $dob = Carbon::createFromFormat('d/m/Y', $request->dob)->format('Y-m-d');
+            }
 
             $created_at = $updated_at = date('Y-m-d H:i:s');
             if($request->has('profile_id')){
@@ -46,15 +109,15 @@ class JobController extends Controller
                 'state' => $request->state,
                 'city' => $request->city,
                 'postcode' => $request->postcode,
-                'phone' => $request->phone,                    
-                'gender' => $request->gender,                    
-                'relation' => $request->relation,                    
-                'notice_period' => $request->notice_period,                    
-                'expected_ctc' => $request->expected_ctc,                    
-                'current_ctc' => $request->current_ctc,                    
-                'department_id' => $request->department_id,                            
-                'created_at' => $created_at,                            
-                'updated_at' => $updated_at,                            
+                'phone' => $request->phone_number,
+                'gender' => $request->gender,
+                'relation' => $request->relation,
+                'notice_period' => $request->notice_period,
+                'expected_ctc' => $request->expected_ctc,
+                'current_ctc' => $request->current_ctc,
+                'department_id' => $request->department_id,        
+                'created_at' => $created_at,        
+                'updated_at' => $updated_at,        
             ]);
 
             /*
@@ -180,6 +243,36 @@ class JobController extends Controller
 
         } catch(Exception $e){
             Log::emergency('job application detail Exception:: Message:: '.$e->getMessage().' line:: '.$e->getLine().' Code:: '.$e->getCode().' file:: '.$e->getFile());
+            Session::flash('alert-danger', 'Something went wrong, Please try again!!');
+            return redirect()->route('home');
+        }
+    }
+    public function destroy(){
+        try{
+            DB::beginTransaction();
+
+            $profile = Auth::user()->profile;
+            if(empty($profile)){
+                Session::flash('alert-danger', 'Data Not Found!!');
+                return redirect()->route('home');    
+            }
+
+            $profile->education()->delete();
+            $profile->experience()->delete();
+            $profile->languageknown()->delete();
+            $profile->technologyknown()->delete();
+            $profile->reference()->delete();
+            $profile->location()->delete();
+            $profile->delete();
+
+
+            DB::commit();
+
+            Session::flash('alert-success', 'Your application details has been deleted successfully');
+            return redirect()->route('home');    
+
+        } catch(Exception $e){
+            Log::emergency('job application delete Exception:: Message:: '.$e->getMessage().' line:: '.$e->getLine().' Code:: '.$e->getCode().' file:: '.$e->getFile());
             DB::rollback();
             Session::flash('alert-danger', 'Something went wrong, Please try again!!');
             return redirect()->route('home');
